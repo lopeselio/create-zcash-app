@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  cli:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test
+
+  template:
+    # Scaffold a real app, build it, and run its checkout tests against a THS regtest network.
+    runs-on: ubuntu-latest
+    needs: cli
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: node bin/create-zcash-app.js "$RUNNER_TEMP/shop" --use-npm
+      - run: npm run typecheck
+        working-directory: ${{ runner.temp }}/shop
+      - run: npm run build
+        working-directory: ${{ runner.temp }}/shop
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+      - run: curl --proto '=https' --tlsv1.2 -fsSL https://raw.githubusercontent.com/zcashlabs/thus-spoke-zakura/main/install.sh | sh
+      - run: npm test
+        working-directory: ${{ runner.temp }}/shop
