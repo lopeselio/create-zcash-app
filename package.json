@@ -1,0 +1,40 @@
+{
+  "name": "create-zcash-app",
+  "version": "0.1.0",
+  "description": "Create a Next.js app that accepts shielded Zcash payments, with a local regtest network for development and tests",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": "lopeselio",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lopeselio/create-zcash-app.git"
+  },
+  "homepage": "https://github.com/lopeselio/create-zcash-app#readme",
+  "bugs": {
+    "url": "https://github.com/lopeselio/create-zcash-app/issues"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "bin": {
+    "create-zcash-app": "bin/create-zcash-app.js"
+  },
+  "files": [
+    "bin",
+    "template",
+    "!template/node_modules",
+    "!template/.next"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "zcash",
+    "create-app",
+    "nextjs",
+    "zip321",
+    "payments",
+    "starter"
+  ]
+}
