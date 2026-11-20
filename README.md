@@ -32,7 +32,7 @@ flow without a phone.
 
 | | |
 |---|---|
-| [zip321](https://github.com/lopeselio/zip321-js) | Strict ZIP-321 payment requests with full address validation |
+| [zcash-zip321](https://github.com/lopeselio/zcash-zip321) | Strict ZIP-321 payment requests with full address validation |
 | [ths-js](https://github.com/lopeselio/ths-js) | Start and drive a THS regtest network from tests |
 | [Thus Spoke Zakura](https://github.com/zcashlabs/thus-spoke-zakura) | The local Zcash network |
 | [zcash.js](https://github.com/zcashlabs/zcashjs) | Planned backend for testnet and mainnet (see below) |

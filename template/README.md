@@ -60,7 +60,7 @@ correct payments mark an invoice paid while underpayments and wrong memos do not
 | | |
 |---|---|
 | `lib/wallet.ts` | The only place that talks to Zcash: a receive address and incoming payments. |
-| `lib/invoices.ts` | Creates invoices (ZIP-321 URIs via [`zip321`](https://github.com/lopeselio/zip321-js)) and matches payments by memo. |
+| `lib/invoices.ts` | Creates invoices (ZIP-321 URIs via [`zcash-zip321`](https://github.com/lopeselio/zcash-zip321)) and matches payments by memo. |
 | `app/api/invoices/*` | Create, poll, and (in development) test-pay invoices. |
 | `app/page.tsx`, `app/invoice/[id]/page.tsx` | Checkout form and the QR/status page. |
 
