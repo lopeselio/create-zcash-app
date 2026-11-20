@@ -1,4 +1,4 @@
-import { formatPaymentRequest, formatZec } from 'zip321';
+import { formatPaymentRequest, formatZec } from 'zcash-zip321';
 import type { Wallet } from './wallet.ts';
 
 export interface Invoice {

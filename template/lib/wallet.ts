@@ -1,7 +1,7 @@
 // The app talks to Zcash only through this interface, so the backend can change without
 // touching pages or invoices. Today: a Thus Spoke Zakura (THS) regtest node for local
 // development and tests. Next: a zcash.js light client with a viewing key for test/mainnet.
-import { memoText, parsePaymentRequest, type Network } from 'zip321';
+import { memoText, parsePaymentRequest, type Network } from 'zcash-zip321';
 
 export interface IncomingPayment {
   txid: string;

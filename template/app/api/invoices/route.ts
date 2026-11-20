@@ -1,4 +1,4 @@
-import { parseZec } from 'zip321';
+import { parseZec } from 'zcash-zip321';
 import { createInvoice, toJSON } from '../../../lib/invoices.ts';
 import { getWallet } from '../../../lib/wallet.ts';
 

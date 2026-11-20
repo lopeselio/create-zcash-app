@@ -3,7 +3,7 @@
 import { after, before, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createTestTHSClient } from 'ths-js';
-import { memoText, parsePaymentRequest, parseZec } from 'zip321';
+import { memoText, parsePaymentRequest, parseZec } from 'zcash-zip321';
 import { createInvoice, refreshInvoice } from '../lib/invoices.ts';
 import { thsWallet, type Wallet } from '../lib/wallet.ts';
 

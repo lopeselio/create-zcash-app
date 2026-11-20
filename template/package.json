@@ -18,7 +18,7 @@
     "qrcode": "^1.5.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "zip321": "github:lopeselio/zip321-js"
+    "zcash-zip321": "^0.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.18.0",
