@@ -26,6 +26,7 @@ flow without a phone.
 - Docker and the [Thus Spoke Zakura](https://github.com/zcashlabs/thus-spoke-zakura) launcher, which runs Zakura,
   lightwalletd and a funded development wallet:
   `curl -fsSL https://raw.githubusercontent.com/zcashlabs/thus-spoke-zakura/main/install.sh | sh`
+  THS's native runtime works too, without Docker: `ths run --native -- npm run dev` and `THS_NATIVE=1 npm test`.
 
 ## Built on
 

@@ -48,7 +48,9 @@ export async function createInvoice(wallet: Wallet, input: { amount: bigint; des
 export async function refreshInvoice(wallet: Wallet, id: string): Promise<Invoice | undefined> {
   const invoice = store.get(id);
   if (!invoice || invoice.status === 'paid') return invoice;
-  const paid = (await wallet.incomingPayments()).find(
+  // A payment carrying this memo can only arrive after the invoice; the margin covers clock skew with the node.
+  const since = new Date(Date.parse(invoice.createdAt) - 5 * 60_000);
+  const paid = (await wallet.incomingPayments({ since })).find(
     (p) => p.confirmed && p.memos.includes(invoice.memo) && p.amount >= invoice.amount,
   );
   if (paid) {

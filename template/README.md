@@ -30,6 +30,19 @@ or, in one command with a fresh network that is deleted afterwards:
 ths run -- npm run dev
 ```
 
+### Without Docker
+
+THS can also run its services as local processes ([native runtime](https://github.com/zcashlabs/thus-spoke-zakura/pull/452)).
+Native runtime bundles aren't in a THS release yet; once you have one:
+
+```sh
+ths run --native -- npm run dev   # sets THS_API_URL for the app
+THS_NATIVE=1 npm test             # runs the checkout tests natively
+```
+
+A native `ths start` picks free ports instead of the default `32805`, so the app can't find it on its own. Point it at the
+instance with `THS_API_URL=<dashboard URL from ths endpoints> npm run dev`.
+
 Create an invoice and press **Pay from test wallet (THS)** to watch it get paid. The THS dashboard (printed by
 `ths start`) shows the transaction, its memo and the blocks.
 

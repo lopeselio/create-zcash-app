@@ -15,8 +15,11 @@ export interface Wallet {
   network: Network;
   /** The address customers pay. */
   receiveAddress(): Promise<string>;
-  /** Recent payments into the receive address, newest first. */
-  incomingPayments(): Promise<IncomingPayment[]>;
+  /**
+   * Payments into the receive address, newest first. With `since`, the wallet may stop looking once it reaches
+   * payments first seen before that time.
+   */
+  incomingPayments(options?: { since?: Date }): Promise<IncomingPayment[]>;
   /** Development only: pay a ZIP-321 URI from a funded test account, like a customer's wallet would. */
   payFromTestWallet?(uri: string): Promise<{ txid: string }>;
 }
@@ -27,6 +30,8 @@ interface THSAccount {
   ironwood_zatoshi: number;
 }
 interface THSActivity {
+  id: string;
+  created_at: string | null;
   txid: string;
   from_account: number | null;
   to_accounts: number[];
@@ -37,15 +42,22 @@ interface THSActivity {
 
 const ONE_ZEC = 100_000_000n;
 const FEE_MARGIN = 1_000_000n; // 0.01 ZEC, comfortably above a regtest fee
+const MAX_ACTIVITY_PAGES = 50;
+
+/** THS records `created_at` in UTC as `YYYY-MM-DD HH:MM:SS`, which `Date` would otherwise read as local time. */
+function utc(timestamp: string): Date {
+  return new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(timestamp) ? timestamp : `${timestamp.replace(' ', 'T')}Z`);
+}
 
 /**
  * A wallet backed by a THS development account. `account` receives payments; `payer` is the
- * test customer used by `payFromTestWallet`.
+ * test customer used by `payFromTestWallet`. `pageSize` (1–100) is the activity page size.
  */
-export function thsWallet(options: { apiUrl: string; account?: number; payer?: number }): Wallet {
+export function thsWallet(options: { apiUrl: string; account?: number; payer?: number; pageSize?: number }): Wallet {
   const api = options.apiUrl.replace(/\/$/, '');
   const account = options.account ?? 1;
   const payer = options.payer ?? 2;
+  const pageSize = options.pageSize ?? 100;
 
   async function call<T>(path: string, body?: unknown): Promise<T> {
     const res = await fetch(`${api}${path}`, {
@@ -91,16 +103,37 @@ export function thsWallet(options: { apiUrl: string; account?: number; payer?: n
       return match.unified_address;
     },
 
-    async incomingPayments() {
-      const activity = await call<THSActivity[]>('/api/v1/activity?limit=100');
-      return activity
-        .filter((a) => a.to_accounts.includes(account) && a.from_account !== account && a.status !== 'failed')
-        .map((a) => ({
-          txid: a.txid,
-          amount: BigInt(a.amount_zatoshi),
-          memos: a.memos,
-          confirmed: a.status === 'confirmed',
-        }));
+    async incomingPayments({ since } = {}) {
+      const payments: IncomingPayment[] = [];
+      let before: string | undefined;
+      for (let page = 0; page < MAX_ACTIVITY_PAGES; page++) {
+        const query = new URLSearchParams({ limit: String(pageSize), account: String(account) });
+        if (before) query.set('before', before);
+        const res = await fetch(`${api}/api/v1/activity?${query}`, { cache: 'no-store' });
+        if (res.status === 409) {
+          // The cursor entry is gone (THS reorganised its history); start again from the newest page.
+          payments.length = 0;
+          before = undefined;
+          continue;
+        }
+        const activity = (await res.json().catch(() => null)) as THSActivity[] | { error?: { message?: string } } | null;
+        if (!res.ok || !Array.isArray(activity)) {
+          throw new Error(`THS /api/v1/activity: ${(activity as { error?: { message?: string } })?.error?.message ?? res.statusText}`);
+        }
+        // THS releases before activity paging ignore `account`, so check the recipient here as well.
+        for (const a of activity) {
+          if (a.to_accounts.includes(account) && a.from_account !== account && a.status !== 'failed') {
+            payments.push({ txid: a.txid, amount: BigInt(a.amount_zatoshi), memos: a.memos, confirmed: a.status === 'confirmed' });
+          }
+        }
+        // Pages are in first-seen order, newest first, so an older page cannot hold a payment seen after `since`.
+        // Without the header, THS predates paging and has returned only the newest entries.
+        const oldest = activity.at(-1);
+        const reachedSince = since && oldest?.created_at && utc(oldest.created_at) < since;
+        if (res.headers.get('x-ths-has-more') !== 'true' || !oldest || reachedSince) break;
+        before = oldest.id;
+      }
+      return payments;
     },
 
     async payFromTestWallet(uri) {
